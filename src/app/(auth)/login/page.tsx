@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
+import { Mic } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -36,15 +37,20 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-indigo-600">InterviewPrep</h1>
+      <div className="w-full max-w-md animate-[scale-in_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards]">
+        <div className="text-center mb-8 animate-[fade-down_0.6s_ease-out_forwards]">
+          <Link href="/" className="inline-flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+              <Mic className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-xl font-bold text-gray-900">InterviewPrep</span>
+          </Link>
           <p className="text-gray-600 mt-2">Sign in to your account</p>
         </div>
         <Card>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm">
+              <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm animate-[fade-up_0.3s_ease-out_forwards]">
                 {error}
               </div>
             )}

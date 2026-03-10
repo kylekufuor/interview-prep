@@ -186,7 +186,7 @@ export default function DashboardPage() {
             return (
               <Card
                 key={interview.id}
-                className="hover:border-indigo-200 transition-colors cursor-pointer"
+                className="hover:border-indigo-200 cursor-pointer hover-lift"
                 onClick={() => {
                   if (interview.status === 'analyzed') {
                     router.push(`/review/${interview.id}`);
