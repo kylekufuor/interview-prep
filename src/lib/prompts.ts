@@ -1,16 +1,16 @@
-import { InterviewType, Specialty } from './types';
+import { InterviewType, Field, FIELD_LABELS } from './types';
 
-const ROLE_CONTEXT: Record<Specialty, string> = {
-  frontend:
-    'frontend engineering, including React, JavaScript/TypeScript, CSS, browser APIs, performance optimization, and UI/UX best practices',
-  backend:
-    'backend engineering, including API design, databases, server architecture, authentication, caching, and scalability',
-  fullstack:
-    'full-stack engineering, covering both frontend and backend technologies, system integration, and end-to-end application development',
-  data_engineering:
-    'data engineering, including data pipelines, ETL processes, data warehousing, SQL, distributed systems like Spark, and data modeling',
+const FIELD_CONTEXT: Record<Field, string> = {
   devops:
-    'DevOps engineering, including CI/CD pipelines, infrastructure as code, containerization, cloud platforms (AWS/GCP/Azure), monitoring, and site reliability',
+    'DevOps and infrastructure, including CI/CD pipelines, infrastructure as code, containerization, cloud platforms (AWS/GCP/Azure), monitoring, automation, and site reliability',
+  cyber_security:
+    'cybersecurity, including threat detection, vulnerability assessment, incident response, security architecture, penetration testing, compliance frameworks, and security operations',
+  project_management:
+    'technical project management, including agile methodologies, sprint planning, stakeholder management, risk assessment, resource allocation, and delivery optimization',
+  data:
+    'data and analytics, including data pipelines, ETL processes, data warehousing, SQL, distributed systems, machine learning, data modeling, and statistical analysis',
+  business_intelligence:
+    'business intelligence, including data visualization, dashboard development, reporting systems, KPI tracking, data storytelling, and BI tools like Power BI, Tableau, and Looker',
 };
 
 const INTERVIEW_STYLE: Record<InterviewType, string> = {
@@ -25,41 +25,66 @@ Guidelines:
 - Aim for about 6-8 questions total across the interview.
 - Do NOT provide feedback or hints during the interview. Save that for after.`,
 
-  technical: `You are conducting a technical coding interview. Your goal is to assess the candidate's problem-solving skills, coding ability, and technical knowledge.
+  technical: `You are conducting a technical interview. Your goal is to assess the candidate's problem-solving skills, technical knowledge, and practical abilities.
 
 Guidelines:
-- Start with a brief introduction and then present a coding problem appropriate for their role.
+- Start with a brief introduction and then present a problem appropriate for their role and experience level.
 - Present ONE problem at a time. Start medium difficulty, then adjust based on performance.
 - Describe the problem clearly with examples and constraints.
-- Encourage the candidate to think aloud and talk through their approach before coding.
+- Encourage the candidate to think aloud and talk through their approach.
 - Ask clarifying questions back if they make assumptions.
 - If they're stuck, give small hints rather than the answer.
-- After they solve (or attempt) the problem, discuss time/space complexity.
+- After they solve (or attempt) the problem, discuss their approach and trade-offs.
 - Ask about edge cases and how they'd test their solution.
 - You may present 1-2 problems depending on complexity and time.
-- Do NOT write the solution for them. Guide them to discover it.`,
+- Do NOT solve the problem for them. Guide them to discover it.`,
 
-  system_design: `You are conducting a system design interview. Your goal is to assess the candidate's ability to design scalable, reliable systems.
+  system_design: `You are conducting a system design interview. Your goal is to assess the candidate's ability to design scalable, reliable systems and architectures.
 
 Guidelines:
-- Present a real-world system design problem appropriate for their role and experience level.
-- Start with a broad, open-ended question (e.g., "Design a URL shortener" or "Design a real-time chat system").
+- Present a real-world design problem appropriate for their role and experience level.
+- Start with a broad, open-ended question relevant to their field.
 - Let the candidate drive the conversation. They should ask clarifying questions about requirements.
 - If they don't ask, prompt them: "What questions do you have about the requirements?"
 - Evaluate their approach to: requirements gathering, high-level architecture, component design, data modeling, scalability, trade-offs, and bottlenecks.
-- Ask probing questions: "What happens if this component fails?", "How would you handle 10x the traffic?"
+- Ask probing questions: "What happens if this component fails?", "How would you handle 10x the load?"
 - Encourage them to draw out their design (they have a whiteboard available).
 - One design problem for the full interview.
 - Do NOT design the system for them. Guide with questions.`,
 };
 
-export function buildInterviewSystemPrompt(
-  interviewType: InterviewType,
-  roleType: Specialty
-): string {
-  return `You are an experienced senior engineer acting as an interviewer at a top tech company. You are conducting a mock interview for a candidate specializing in ${ROLE_CONTEXT[roleType]}.
+interface InterviewContext {
+  interviewType: InterviewType;
+  field: Field;
+  jobTitle: string;
+  experienceLevel?: string;
+  jobDescription?: string;
+}
 
-${INTERVIEW_STYLE[interviewType]}
+export function buildInterviewSystemPrompt(ctx: InterviewContext): string {
+  const fieldLabel = FIELD_LABELS[ctx.field];
+  const experienceNote = ctx.experienceLevel
+    ? `\nThe candidate has ${ctx.experienceLevel} years of experience. Calibrate your questions accordingly — ${
+        ctx.experienceLevel === '0-1'
+          ? 'focus on fundamentals and entry-level scenarios'
+          : ctx.experienceLevel === '1-3'
+            ? 'ask junior to mid-level questions'
+            : ctx.experienceLevel === '3-5'
+              ? 'ask mid-level questions with some depth'
+              : ctx.experienceLevel === '5-10'
+                ? 'ask senior-level questions requiring depth and breadth'
+                : 'ask staff/principal-level questions about architecture, strategy, and leadership'
+      }.`
+    : '';
+
+  const jdNote = ctx.jobDescription
+    ? `\nThe candidate provided this job description they are preparing for. Tailor your questions to match the requirements, technologies, and responsibilities listed:\n\n---\n${ctx.jobDescription}\n---\n`
+    : '';
+
+  return `You are an experienced hiring manager conducting a mock interview for a ${ctx.jobTitle} position in the ${fieldLabel} field. The candidate is specializing in ${FIELD_CONTEXT[ctx.field]}.
+${experienceNote}
+${jdNote}
+${INTERVIEW_STYLE[ctx.interviewType]}
 
 General rules:
 - Keep your responses concise and conversational — this is a spoken interview, not a written exam.
@@ -70,8 +95,7 @@ General rules:
 }
 
 export function buildAnalysisPrompt(
-  interviewType: InterviewType,
-  roleType: Specialty,
+  ctx: InterviewContext,
   transcript: { role: string; content: string }[]
 ): string {
   const formattedTranscript = transcript
@@ -81,8 +105,12 @@ export function buildAnalysisPrompt(
     )
     .join('\n\n');
 
-  return `You are an expert interview coach analyzing a mock ${interviewType.replace('_', ' ')} interview for a ${roleType.replace('_', ' ')} engineering role.
+  const jdNote = ctx.jobDescription
+    ? `\nThe candidate was interviewing against this job description:\n${ctx.jobDescription}\n`
+    : '';
 
+  return `You are an expert interview coach analyzing a mock ${ctx.interviewType.replace('_', ' ')} interview for a ${ctx.jobTitle} role in ${FIELD_LABELS[ctx.field]}.${ctx.experienceLevel ? ` The candidate has ${ctx.experienceLevel} years of experience.` : ''}
+${jdNote}
 Here is the full transcript:
 
 ${formattedTranscript}

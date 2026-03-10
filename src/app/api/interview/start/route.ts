@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import anthropic from '@/lib/claude';
 import { buildInterviewSystemPrompt } from '@/lib/prompts';
-import { InterviewType, Specialty } from '@/lib/types';
+import { InterviewType, Field } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -14,10 +14,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { interview_type, role_type } = (await request.json()) as {
-    interview_type: InterviewType;
-    role_type: Specialty;
-  };
+  const { interview_type, job_title, field, job_description } =
+    (await request.json()) as {
+      interview_type: InterviewType;
+      job_title: string;
+      field: Field;
+      job_description?: string;
+    };
+
+  // Get user profile for experience level
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('experience_level')
+    .eq('id', user.id)
+    .single();
 
   // Create interview record
   const { data: interview, error: dbError } = await supabase
@@ -25,7 +35,9 @@ export async function POST(request: NextRequest) {
     .insert({
       student_id: user.id,
       interview_type,
-      role_type,
+      job_title,
+      field,
+      job_description: job_description || null,
       status: 'in_progress',
     })
     .select()
@@ -36,7 +48,13 @@ export async function POST(request: NextRequest) {
   }
 
   // Get first message from Claude
-  const systemPrompt = buildInterviewSystemPrompt(interview_type, role_type);
+  const systemPrompt = buildInterviewSystemPrompt({
+    interviewType: interview_type,
+    field,
+    jobTitle: job_title,
+    experienceLevel: profile?.experience_level || undefined,
+    jobDescription: job_description,
+  });
 
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',

@@ -8,7 +8,7 @@ import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import {
   getInterviewTypeLabel,
-  getSpecialtyLabel,
+  getFieldLabel,
   formatDate,
 } from '@/lib/utils';
 import { Profile, Interview, Analysis } from '@/lib/types';
@@ -72,7 +72,7 @@ export default function DashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">
-            Teacher Dashboard
+            Mentor Dashboard
           </h1>
           <Link href="/classroom/new">
             <Button>
@@ -203,7 +203,7 @@ export default function DashboardPage() {
                           {getInterviewTypeLabel(interview.interview_type)}
                         </Badge>
                         <Badge>
-                          {getSpecialtyLabel(interview.role_type)}
+                          {interview.job_title}
                         </Badge>
                         <Badge
                           variant={
@@ -222,6 +222,7 @@ export default function DashboardPage() {
                         </Badge>
                       </div>
                       <p className="text-xs text-gray-500">
+                        {getFieldLabel(interview.field)} &middot;{' '}
                         {formatDate(interview.started_at)}
                       </p>
                     </div>

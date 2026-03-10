@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { FIELD_LABELS } from './types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -28,15 +29,8 @@ export function formatDate(dateString: string): string {
   });
 }
 
-export function getSpecialtyLabel(specialty: string): string {
-  const labels: Record<string, string> = {
-    frontend: 'Frontend',
-    backend: 'Backend',
-    fullstack: 'Full Stack',
-    data_engineering: 'Data Engineering',
-    devops: 'DevOps',
-  };
-  return labels[specialty] || specialty;
+export function getFieldLabel(field: string): string {
+  return FIELD_LABELS[field as keyof typeof FIELD_LABELS] || field;
 }
 
 export function getInterviewTypeLabel(type: string): string {

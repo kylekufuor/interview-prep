@@ -6,8 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import {
-  getInterviewTypeLabel,
-  getSpecialtyLabel,
+  getFieldLabel,
   formatDate,
 } from '@/lib/utils';
 import { Copy, Check, Users } from 'lucide-react';
@@ -171,9 +170,14 @@ export default function ClassroomDetailPage() {
                     {student.profile.full_name || student.profile.email}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
-                    {student.profile.specialty && (
+                    {student.profile.job_title && (
                       <Badge>
-                        {getSpecialtyLabel(student.profile.specialty)}
+                        {student.profile.job_title}
+                      </Badge>
+                    )}
+                    {student.profile.field && (
+                      <Badge variant="info">
+                        {getFieldLabel(student.profile.field)}
                       </Badge>
                     )}
                     <span className="text-xs text-gray-500">

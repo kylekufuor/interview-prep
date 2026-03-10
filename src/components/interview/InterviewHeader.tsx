@@ -1,19 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { formatDuration, getInterviewTypeLabel, getSpecialtyLabel } from '@/lib/utils';
+import { formatDuration, getInterviewTypeLabel } from '@/lib/utils';
 import Badge from '@/components/ui/Badge';
 import { Clock } from 'lucide-react';
 
 interface InterviewHeaderProps {
   interviewType: string;
-  roleType: string;
+  jobTitle: string;
   messageCount: number;
 }
 
 export default function InterviewHeader({
   interviewType,
-  roleType,
+  jobTitle,
   messageCount,
 }: InterviewHeaderProps) {
   const [elapsed, setElapsed] = useState(0);
@@ -30,7 +30,7 @@ export default function InterviewHeader({
     <div className="h-12 bg-white border-b border-gray-200 px-4 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <Badge variant="info">{getInterviewTypeLabel(interviewType)}</Badge>
-        <Badge>{getSpecialtyLabel(roleType)}</Badge>
+        <Badge>{jobTitle}</Badge>
       </div>
       <div className="flex items-center gap-4 text-sm text-gray-500">
         <span>Q{questionCount} of ~8</span>

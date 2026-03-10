@@ -32,7 +32,8 @@ export default function InterviewPage() {
   const [useVoice, setUseVoice] = useState(true);
   const [interview, setInterview] = useState<{
     interview_type: string;
-    role_type: string;
+    job_title: string;
+    field: string;
   } | null>(null);
   const [ending, setEnding] = useState(false);
 
@@ -46,7 +47,7 @@ export default function InterviewPage() {
     const loadInterview = async () => {
       const { data: interviewData } = await supabase
         .from('interviews')
-        .select('interview_type, role_type')
+        .select('interview_type, job_title, field')
         .eq('id', id)
         .single();
 
@@ -219,7 +220,7 @@ export default function InterviewPage() {
       {interview && (
         <InterviewHeader
           interviewType={interview.interview_type}
-          roleType={interview.role_type}
+          jobTitle={interview.job_title}
           messageCount={messages.length}
         />
       )}

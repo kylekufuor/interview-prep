@@ -9,7 +9,9 @@ CREATE TABLE profiles (
   email TEXT NOT NULL,
   full_name TEXT NOT NULL DEFAULT '',
   role TEXT CHECK (role IN ('student', 'teacher')),
-  specialty TEXT CHECK (specialty IN ('frontend', 'backend', 'fullstack', 'data_engineering', 'devops')),
+  field TEXT CHECK (field IN ('devops', 'cyber_security', 'project_management', 'data', 'business_intelligence')),
+  job_title TEXT,
+  experience_level TEXT CHECK (experience_level IN ('0-1', '1-3', '3-5', '5-10', '10+')),
   avatar_url TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
@@ -39,7 +41,9 @@ CREATE TABLE interviews (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   student_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   interview_type TEXT NOT NULL CHECK (interview_type IN ('behavioral', 'technical', 'system_design')),
-  role_type TEXT NOT NULL CHECK (role_type IN ('frontend', 'backend', 'fullstack', 'data_engineering', 'devops')),
+  job_title TEXT NOT NULL,
+  field TEXT NOT NULL CHECK (field IN ('devops', 'cyber_security', 'project_management', 'data', 'business_intelligence')),
+  job_description TEXT,
   status TEXT NOT NULL DEFAULT 'in_progress' CHECK (status IN ('in_progress', 'completed', 'analyzed')),
   started_at TIMESTAMPTZ DEFAULT now(),
   completed_at TIMESTAMPTZ

@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import anthropic from '@/lib/claude';
 import { buildInterviewSystemPrompt } from '@/lib/prompts';
-import { InterviewType, Specialty } from '@/lib/types';
+import { InterviewType, Field } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -31,6 +31,13 @@ export async function POST(request: NextRequest) {
     return new Response('Interview not found', { status: 404 });
   }
 
+  // Get user profile for experience level
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('experience_level')
+    .eq('id', user.id)
+    .single();
+
   // Save user message
   await supabase.from('messages').insert({
     interview_id,
@@ -50,10 +57,13 @@ export async function POST(request: NextRequest) {
     content: m.content,
   }));
 
-  const systemPrompt = buildInterviewSystemPrompt(
-    interview.interview_type as InterviewType,
-    interview.role_type as Specialty
-  );
+  const systemPrompt = buildInterviewSystemPrompt({
+    interviewType: interview.interview_type as InterviewType,
+    field: interview.field as Field,
+    jobTitle: interview.job_title,
+    experienceLevel: profile?.experience_level || undefined,
+    jobDescription: interview.job_description || undefined,
+  });
 
   // Stream response from Claude
   const stream = anthropic.messages.stream({

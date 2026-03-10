@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
-import { getInterviewTypeLabel, getSpecialtyLabel, formatDate } from '@/lib/utils';
+import { getInterviewTypeLabel, getFieldLabel, formatDate } from '@/lib/utils';
 import {
   CheckCircle,
   AlertTriangle,
@@ -85,8 +85,9 @@ export default function ReviewPage() {
           <Badge variant="info">
             {getInterviewTypeLabel(interview.interview_type)}
           </Badge>
-          <Badge>{getSpecialtyLabel(interview.role_type)}</Badge>
+          <Badge>{interview.job_title}</Badge>
           <span className="text-sm text-gray-500">
+            {getFieldLabel(interview.field)} &middot;{' '}
             {formatDate(interview.started_at)}
           </span>
         </div>

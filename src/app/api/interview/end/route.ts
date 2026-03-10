@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import anthropic from '@/lib/claude';
 import { buildAnalysisPrompt } from '@/lib/prompts';
-import { InterviewType, Specialty } from '@/lib/types';
+import { InterviewType, Field } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -33,6 +33,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Get user profile for experience level
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('experience_level')
+    .eq('id', user.id)
+    .single();
+
   // Mark interview as completed
   await supabase
     .from('interviews')
@@ -52,8 +59,13 @@ export async function POST(request: NextRequest) {
 
   // Generate analysis with Claude
   const analysisPrompt = buildAnalysisPrompt(
-    interview.interview_type as InterviewType,
-    interview.role_type as Specialty,
+    {
+      interviewType: interview.interview_type as InterviewType,
+      field: interview.field as Field,
+      jobTitle: interview.job_title,
+      experienceLevel: profile?.experience_level || undefined,
+      jobDescription: interview.job_description || undefined,
+    },
     messages
   );
 
